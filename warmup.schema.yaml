@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Warmup schema",
+  "additionalProperties": false,
+  "properties": {
+    "schedules": {
+      "type": "array",
+      "uniqueItems": true,
+      "description": "The suspend rules",
+      "items": {
+        "type": "object",
+        "required": [
+          "schedule"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "class": {
+            "type": "string"
+          },
+          "interval": {
+            "type": "number",
+            "default": 3600
+          },
+          "schedule": {
+            "type": "array",
+            "description": "The data",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "day",
+                "messages"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "day": {
+                  "type": "number"
+                },
+                "messages": {
+                  "type": "number"
+                },
+                "interval": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
