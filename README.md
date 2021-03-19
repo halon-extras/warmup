@@ -1,7 +1,7 @@
 ## IP warmup plugin
 
 The IP warmup plugin can be used to schedule / ramp up traffic on newly added IPs.
-Depending on the age (```added``` property) and the ```schedules``` traffic volumes are automatically calculated.
+Depending on the age (```added``` property) and the ```schedules``` traffic volumes are automatically calculated and controlled using dynamic policies.
 
 ### Examples
 
