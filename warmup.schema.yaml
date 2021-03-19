@@ -7,7 +7,7 @@
     "schedules": {
       "type": "array",
       "uniqueItems": true,
-      "description": "The suspend rules",
+      "description": "The schedules",
       "items": {
         "type": "object",
         "required": [
