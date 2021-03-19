@@ -32,3 +32,14 @@ ips:
     class: slow_warmup
     added: 2021-03-10
 ```
+
+In the pre-delivery context, make use to configured IP's (may also be used to filer a specific class ```warmup_ips([class])```).
+
+```
+Try(
+	[
+		"sourceip" => warmup_ips(),
+		"sourceip_random" => false,
+	]
+);
+```
