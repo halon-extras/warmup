@@ -33,6 +33,14 @@ ips:
     added: 2021-03-10
 ```
 
+The policy config in smtpd-policy.yaml
+
+```
+policies:
+  - fields:
+    - localip
+```
+
 In the pre-delivery context, make use to configured IP's (may also be used to filer a specific class ```warmup_ips([class])```).
 
 ```
