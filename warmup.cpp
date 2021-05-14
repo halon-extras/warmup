@@ -17,6 +17,7 @@ struct rate_t
 struct ip_t
 {
 	std::string ip;
+	std::string helo;
 	std::string class_;
 	time_t added;
 };
@@ -138,6 +139,12 @@ void warmup_ips(HalonHSLContext* hhc, HalonHSLArguments* args, HalonHSLValue* re
 		HalonMTA_hsl_value_array_add(v, &k2, &v2);
 		HalonMTA_hsl_value_set(k2, HALONMTA_HSL_TYPE_STRING, "address", 0);
 		HalonMTA_hsl_value_set(v2, HALONMTA_HSL_TYPE_STRING, (const char*)ip.ip.c_str(), 0);
+		if (!ip.helo.empty())
+		{
+			HalonMTA_hsl_value_array_add(v, &k2, &v2);
+			HalonMTA_hsl_value_set(k2, HALONMTA_HSL_TYPE_STRING, "helo", 0);
+			HalonMTA_hsl_value_set(v2, HALONMTA_HSL_TYPE_STRING, (const char*)ip.helo.c_str(), 0);
+		}
 		++i;
 	}
 	return;
@@ -283,6 +290,7 @@ bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, std::map<size_
 	while ((d = HalonMTA_config_array_get(s, l++)))
 	{
 		const char* ip = HalonMTA_config_string_get(HalonMTA_config_object_get(d, "ip"), nullptr);
+		const char* helo = HalonMTA_config_string_get(HalonMTA_config_object_get(d, "helo"), nullptr);
 		const char* class_ = HalonMTA_config_string_get(HalonMTA_config_object_get(d, "class"), nullptr);
 		const char* added = HalonMTA_config_string_get(HalonMTA_config_object_get(d, "added"), nullptr);
 		if (!ip || !class_ || !added)
@@ -303,6 +311,7 @@ bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, std::map<size_
 
 		ip_t r;
 		r.ip = ip;
+		r.helo = helo;
 		r.class_ = class_;
 		r.added = mktime(&tm);
 		ips.push_back(r);

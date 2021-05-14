@@ -21,6 +21,9 @@
           "ip": {
             "type": "string"
           },
+          "helo": {
+            "type": "string"
+          },
           "added": {
             "type": "string"
           }
