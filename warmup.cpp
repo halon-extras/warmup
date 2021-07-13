@@ -311,7 +311,7 @@ bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, std::map<size_
 
 		ip_t r;
 		r.ip = ip;
-		r.helo = helo;
+		r.helo = helo ? helo : "";
 		r.class_ = class_;
 		r.added = mktime(&tm);
 		ips.push_back(r);
