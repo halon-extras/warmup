@@ -50,7 +50,7 @@ policies:
 
 ### Pre-delivery script hook
 
-In the pre-delivery context, make use to configured IP's (may also be used to filer a specific class ```warmup_ips([class])```).
+In the pre-delivery context, make use to configured IP's (may also be used to filter a specific class ```warmup_ips([class])```).
 
 ```
 Try(
