@@ -45,6 +45,12 @@ bool Halon_init(HalonInitContext* hic)
 		if (!parseConfigSchedule(cfg, schedules))
 			return false;
 
+	if (schedules.empty())
+	{
+		syslog(LOG_CRIT, "No schedules");
+		return false;
+	}
+
 	if (!parseConfigIPs(app, schedules, ips))
 		return false;
 
@@ -199,9 +205,11 @@ void update_rates()
 			if (messages > 0)
 			{
 				auto p = HalonMTA_queue_policy_add(HALONMTA_QUEUE_LOCALIP, nullptr, ip.c_str(), nullptr, nullptr, nullptr, nullptr, 0, messages, interval, std::string(std::string("Day_") + std::to_string(days)).c_str(), 0);
-
+				if (!p)
+					syslog(LOG_CRIT, "WarmUP: failed to add policy for ip:%s class:%s days:%ld rate:%zu/%f", ip.c_str(), ip_.class_.c_str(), days, messages, interval);
+				else
+					syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld rate:%zu/%f", ip.c_str(), ip_.class_.c_str(), days, messages, interval);
 				policies[ip] = { { messages, interval }, p };
-				syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld rate:%zu/%f", ip.c_str(), ip_.class_.c_str(), days, messages, interval);
 			}
 		}
 		else
@@ -228,10 +236,7 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, std::map<size_t
 {
 	auto s = HalonMTA_config_object_get(cfg, "schedules");
 	if (!s)
-	{
-		syslog(LOG_CRIT, "No schedules");
 		return false;
-	}
 
 	size_t x = 0;
 	HalonConfig* d;
