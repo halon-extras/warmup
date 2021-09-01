@@ -18,14 +18,14 @@ plugins:
         - class: slow_warmup
           interval: 3600
           schedule:
-          - day: 0
-            messages: 10
-          - day: 1
-            messages: 20
-          - day: 2
-            messages: 30
-          - day: 3
-            messages: 40
+            - day: 0
+              messages: 10
+            - day: 1
+              messages: 20
+            - day: 2
+              messages: 30
+            - day: 3
+              messages: 40
 ```
 
 ### smtpd-app.yaml
