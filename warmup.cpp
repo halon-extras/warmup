@@ -5,6 +5,7 @@
 #include <thread>
 #include <syslog.h>
 #include <list>
+#include <set>
 #include <map>
 #include <mutex>
 #include <cstring>
@@ -96,7 +97,7 @@ void Halon_config_reload(HalonConfig* hc)
 		std::list<ip_t> ips_new;
 		if (parseConfigIPs(hc, schedules, ips_new))
 		{
-			std::list<std::string> class_;
+			std::set<std::string> class_;
 			for (const auto & o : ips)
 			{
 				bool f = false;
@@ -111,7 +112,7 @@ void Halon_config_reload(HalonConfig* hc)
 				if (!f)
 				{
 					HalonMTA_queue_list_item_delete(HALONMTA_QUEUE_LOCALIP, o.class_.c_str(), o.ip.c_str());
-					class_.push_back(o.class_);
+					class_.insert(o.class_);
 				}
 			}
 			for (const auto & n : ips_new)
@@ -129,7 +130,7 @@ void Halon_config_reload(HalonConfig* hc)
 				{
 					HalonMTA_queue_list_add(HALONMTA_QUEUE_LOCALIP, n.class_.c_str());
 					HalonMTA_queue_list_item_add(HALONMTA_QUEUE_LOCALIP, n.class_.c_str(), n.ip.c_str());
-					class_.push_back(n.class_);
+					class_.insert(n.class_);
 				}
 			}
 			for (const auto & c : class_)
