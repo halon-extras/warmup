@@ -93,9 +93,49 @@ void Halon_config_reload(HalonConfig* hc)
 		if (parseConfigSchedule(hc, schedules2))
 			schedules = schedules2;
 
-		std::list<ip_t> ips2;
-		if (parseConfigIPs(hc, schedules, ips2))
-			ips = ips2;
+		std::list<ip_t> ips_new;
+		if (parseConfigIPs(hc, schedules, ips_new))
+		{
+			std::list<std::string> class_;
+			for (const auto & o : ips)
+			{
+				bool f = false;
+				for (const auto & n : ips_new)
+				{
+					if (o.ip == n.ip && o.class_ == n.class_)
+					{
+						f = true;
+						break;
+					}
+				}
+				if (!f)
+				{
+					HalonMTA_queue_list_item_delete(HALONMTA_QUEUE_LOCALIP, o.class_.c_str(), o.ip.c_str());
+					class_.push_back(o.class_);
+				}
+			}
+			for (const auto & n : ips_new)
+			{
+				bool f = false;
+				for (const auto & o : ips)
+				{
+					if (o.ip == n.ip && o.class_ == n.class_)
+					{
+						f = true;
+						break;
+					}
+				}
+				if (!f)
+				{
+					HalonMTA_queue_list_add(HALONMTA_QUEUE_LOCALIP, n.class_.c_str());
+					HalonMTA_queue_list_item_add(HALONMTA_QUEUE_LOCALIP, n.class_.c_str(), n.ip.c_str());
+					class_.push_back(n.class_);
+				}
+			}
+			for (const auto & c : class_)
+				HalonMTA_queue_list_reload(HALONMTA_QUEUE_LOCALIP, c.c_str());
+			ips = ips_new;
+		}
 
 		for (auto it = policies.begin(); it != policies.end();)
 		{
