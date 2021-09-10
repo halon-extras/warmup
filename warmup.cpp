@@ -35,7 +35,7 @@ bool parseConfigIPs(HalonConfig*, const std::map<std::string, std::map<size_t, r
 void update_rates();
 
 HALON_EXPORT
-bool Halon_init(HalonInitContext* hic)
+bool Halon_early_init(HalonInitContext* hic)
 {
 	HalonConfig *cfg, *app;
 	HalonMTA_init_getinfo(hic, HALONMTA_INIT_CONFIG, nullptr, 0, &cfg, nullptr);
@@ -54,6 +54,17 @@ bool Halon_init(HalonInitContext* hic)
 	if (!parseConfigIPs(app, schedules, ips))
 		return false;
 
+	for (const auto & ip : ips)
+		HalonMTA_queue_list_add(HALONMTA_QUEUE_LOCALIP, ip.class_.c_str());
+	for (const auto & ip : ips)
+		HalonMTA_queue_list_item_add(HALONMTA_QUEUE_LOCALIP, ip.class_.c_str(), ip.ip.c_str());
+	HalonMTA_queue_list_reload(0, nullptr);
+
+	return true;
+}
+
+bool Halon_init(HalonInitContext* hic)
+{
 	update_rates();
 
 	p = std::thread([] {
