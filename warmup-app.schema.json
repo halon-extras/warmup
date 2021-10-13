@@ -48,6 +48,41 @@
             "type": "number",
             "default": 3600
           },
+          "fields": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "oneOf": [
+                    {
+                        "type": "string",
+                        "enum": ["jobid", "localip", "remoteip", "transportid", "recipientdomain", "remotemx"]
+                    },
+                    {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "minProperties": 1,
+                        "maxProperties": 1,
+                        "properties": {
+                            "jobid": {
+                                "type": "string"
+                            },
+                            "remoteip": {
+                              "type": "string"
+                            },
+                            "transportid": {
+                              "type": "string"
+                            },
+                            "recipientdomain": {
+                              "type": "string"
+                            },
+                            "remotemx": {
+                              "type": "string"
+                            }
+                        }
+                    }
+                ]
+            }
+          },
           "schedule": {
             "type": "array",
             "description": "The data",

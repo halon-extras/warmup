@@ -30,6 +30,10 @@ plugins:
 
 ### smtpd-app.yaml
 
+The same IP can be added to multiple classes. The default field is localip.
+
+A example warmup only applying to the google mx'es.
+
 ```
 plugins:
   - id: warmup
@@ -37,15 +41,23 @@ plugins:
       ips:
         - ip: 10.1.1.1
           class: slow_warmup
+          fields:
+            - localip
+            - remotemx: "#google"
           added: 2021-03-10
 ```
 
 ### smtpd-policy.yaml
 
+A example warmup with google mx'es grouped.
+
 ```
-policies:
-  - fields:
-    - localip
+- fields:
+  - localip
+  - remotemx:
+      google:
+      - '*.gmail.com'
+      - '*.google.com'
 ```
 
 ### Pre-delivery script hook

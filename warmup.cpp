@@ -21,17 +21,31 @@ struct ip_t
 	std::string class_;
 	time_t added;
 };
+struct schedule_t
+{
+	int fields = HALONMTA_QUEUE_LOCALIP;
+	std::map<int, std::string> if_;
+	std::map<size_t, rate_t> days;
+};
+struct added_t
+{
+	char* id;
+	int fields = HALONMTA_QUEUE_LOCALIP;
+	std::map<int, std::string> if_;
+	size_t messages;
+	double interval;
+};
 
-std::map<std::string, std::map<size_t, rate_t>> schedules;
+std::map<std::string, schedule_t> schedules;
 std::list<ip_t> ips;
 std::mutex lock;
-std::map<std::string, std::pair<std::pair<size_t, double>, char*>> policies;
+std::map<std::pair<std::string, std::string>, added_t> policies;
 
 bool stop = false;
 std::thread p;
 
-bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, std::map<size_t, rate_t>>& schedules);
-bool parseConfigIPs(HalonConfig*, const std::map<std::string, std::map<size_t, rate_t>>& schedules, std::list<ip_t>&);
+bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& schedules);
+bool parseConfigIPs(HalonConfig*, const std::map<std::string, schedule_t>& schedules, std::list<ip_t>&);
 void update_rates();
 
 HALON_EXPORT
@@ -78,7 +92,7 @@ void Halon_config_reload(HalonConfig* hc)
 
 		syslog(LOG_INFO, "WarmUP: reloading");
 
-		std::map<std::string, std::map<size_t, rate_t>> schedules2;
+		std::map<std::string, schedule_t> schedules2;
 		if (parseConfigSchedule(hc, schedules2))
 			schedules = schedules2;
 
@@ -91,7 +105,7 @@ void Halon_config_reload(HalonConfig* hc)
 			bool found = false;
 			for (const auto & ip : ips)
 			{
-				if (ip.ip == it->first)
+				if (ip.class_ == it->first.first && ip.ip == it->first.second)
 				{
 					found = true;
 					break;
@@ -101,11 +115,11 @@ void Halon_config_reload(HalonConfig* hc)
 				++it;
 			else
 			{
-				if (it->second.second)
+				if (it->second.id)
 				{
-					HalonMTA_queue_policy_delete(it->second.second);
-					free(it->second.second);
-					syslog(LOG_INFO, "WarmUP: untrack ip %s", it->first.c_str());
+					HalonMTA_queue_policy_delete(it->second.id);
+					free(it->second.id);
+					syslog(LOG_INFO, "WarmUP: untrack ip:%s class:%s", it->first.second.c_str(), it->first.first.c_str());
 				}
 				policies.erase(it++);
 			}
@@ -183,14 +197,14 @@ void update_rates()
 	time_t now = time(nullptr);
 	for (const auto & ip_ : ips)
 	{
-		auto ip = ip_.ip;
 		ssize_t days_ = now < ip_.added ? 0 : (now - ip_.added) / (3600 * 24);
 
 		size_t messages = 0;
 		double interval = 0;
 		size_t days = 0;
 
-		for (auto s = schedules[ip_.class_].rbegin(); s != schedules[ip_.class_].rend(); s++)
+		auto schedule = schedules.find(ip_.class_);
+		for (auto s = schedule->second.days.rbegin(); s != schedule->second.days.rend(); s++)
 		{
 			if (days_ > s->first)
 				break;
@@ -199,40 +213,71 @@ void update_rates()
 			interval = s->second.interval;
 		}
 
-		auto it = policies.find(ip);
+		auto it = policies.find({ ip_.class_, ip_.ip });
 		if (it == policies.end())
 		{
 			if (messages > 0)
 			{
-				auto p = HalonMTA_queue_policy_add(HALONMTA_QUEUE_LOCALIP, nullptr, ip.c_str(), nullptr, nullptr, nullptr, nullptr, 0, messages, interval, std::string(std::string("Day_") + std::to_string(days)).c_str(), 0);
+readd:
+				std::map<int, std::string>::iterator ifi;
+				const char* transportid =
+					(ifi = schedule->second.if_.find(HALONMTA_QUEUE_TRANSPORTID)) != schedule->second.if_.end()
+					? ifi->second.c_str()
+					: nullptr;
+				const char* remoteip =
+					(ifi = schedule->second.if_.find(HALONMTA_QUEUE_REMOTEIP)) != schedule->second.if_.end()
+					? ifi->second.c_str()
+					: nullptr;
+				const char* remotemx =
+					(ifi = schedule->second.if_.find(HALONMTA_QUEUE_REMOTEMX)) != schedule->second.if_.end()
+					? ifi->second.c_str()
+					: nullptr;
+				const char* recipientdomain =
+					(ifi = schedule->second.if_.find(HALONMTA_QUEUE_RECIPIENTDOMAIN)) != schedule->second.if_.end()
+					? ifi->second.c_str()
+					: nullptr;
+				const char* jobid =
+					(ifi = schedule->second.if_.find(HALONMTA_QUEUE_JOBID)) != schedule->second.if_.end()
+					? ifi->second.c_str()
+					: nullptr;
+
+				auto p = HalonMTA_queue_policy_add(schedule->second.fields, transportid, ip_.ip.c_str(), remoteip, remotemx, recipientdomain, jobid, 0, messages, interval, std::string(std::string("Day_") + std::to_string(days)).c_str(), 0);
 				if (!p)
-					syslog(LOG_CRIT, "WarmUP: failed to add policy for ip:%s class:%s days:%ld rate:%zu/%f", ip.c_str(), ip_.class_.c_str(), days, messages, interval);
+					syslog(LOG_CRIT, "WarmUP: failed to add policy for ip:%s class:%s days:%ld rate:%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, messages, interval);
 				else
-					syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld rate:%zu/%f", ip.c_str(), ip_.class_.c_str(), days, messages, interval);
-				policies[ip] = { { messages, interval }, p };
+					syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld rate:%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, messages, interval);
+				policies[{ ip_.class_, ip_.ip }] = { p, schedule->second.fields, schedule->second.if_, messages, interval };
 			}
 		}
 		else
 		{
 			if (messages <= 0)
 			{
-				HalonMTA_queue_policy_delete(it->second.second);
-				free(it->second.second);
-				syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld (no limit)", ip.c_str(), ip_.class_.c_str(), days_);
-				policies.erase(ip);
+				HalonMTA_queue_policy_delete(it->second.id);
+				free(it->second.id);
+				syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld (no limit)", ip_.ip.c_str(), ip_.class_.c_str(), days_);
+				policies.erase(it);
 			}
-			else if (it->second.first.first != messages || it->second.first.second != interval)
+			else if (it->second.fields != schedule->second.fields || it->second.if_ != schedule->second.if_)
 			{
-				HalonMTA_queue_policy_update(it->second.second, 0, messages, interval, std::string(std::string("Day_") + std::to_string(days)).c_str(), 0);
-				syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld rate:%zu/%f->%zu/%f", ip.c_str(), ip_.class_.c_str(), days, it->second.first.first, it->second.first.second, messages, interval);
-				it->second.first.first = messages;
-				it->second.first.second = interval;
+				HalonMTA_queue_policy_delete(it->second.id);
+				free(it->second.id);
+				syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld (update)", ip_.ip.c_str(), ip_.class_.c_str(), days_);
+				policies.erase(it);
+				goto readd;
+			}
+			else if (it->second.messages != messages || it->second.interval != interval)
+			{
+				HalonMTA_queue_policy_update(it->second.id, 0, messages, interval, std::string(std::string("Day_") + std::to_string(days)).c_str(), 0);
+				syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld rate:%zu/%f->%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, it->second.messages, it->second.interval, messages, interval);
+				it->second.messages = messages;
+				it->second.interval = interval;
 			}
 		}
 	}
 }
 
-bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, std::map<size_t, rate_t>>& schedules)
+bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& schedules)
 {
 	auto s = HalonMTA_config_object_get(cfg, "schedules");
 	if (!s)
@@ -251,10 +296,42 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, std::map<size_t
 			return false;
 		}
 
-		std::map<size_t, rate_t> schedule;
+		schedule_t schedule;
 
 		size_t l = 0;
 		HalonConfig* i;
+
+		HalonConfig* f = HalonMTA_config_object_get(d, "fields");
+		if (f)
+		{
+			schedule.fields = 0;
+			while ((i = HalonMTA_config_array_get(f, l++)))
+			{
+				for (auto m : (std::map<int, const char*>){
+						{ HALONMTA_QUEUE_TRANSPORTID, "transportid" },
+						{ HALONMTA_QUEUE_LOCALIP, "localip" },
+						{ HALONMTA_QUEUE_REMOTEIP, "remoteip" },
+						{ HALONMTA_QUEUE_REMOTEMX, "remotemx" },
+						{ HALONMTA_QUEUE_RECIPIENTDOMAIN, "domain" },
+						{ HALONMTA_QUEUE_JOBID, "jobid" }
+					})
+				{
+					auto o = HalonMTA_config_object_get(i, m.second);
+					if (o)
+					{
+						schedule.fields |= m.first;
+						schedule.if_[m.first] = HalonMTA_config_string_get(o, nullptr);
+					}
+					else
+					{
+						if (strcmp(HalonMTA_config_string_get(i, nullptr), m.second) == 0)
+							schedule.fields |= m.first;
+					}
+				}
+			}
+		}
+
+		l = 0;
 		while ((i = HalonMTA_config_array_get(s, l++)))
 		{
 			const char* day = HalonMTA_config_string_get(HalonMTA_config_object_get(i, "day"), nullptr);
@@ -269,10 +346,10 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, std::map<size_t
 			rate_t r;
 			r.messages = strtoul(messages, nullptr, 10);
 			r.interval = interval ? strtod(interval, nullptr) : interval_ ? strtod(interval_, nullptr) : 3600;
-			schedule[strtoul(day, nullptr, 10)] = r;
+			schedule.days[strtoul(day, nullptr, 10)] = r;
 		}
 
-		if (schedule.empty())
+		if (schedule.days.empty())
 			return false;
 
 		schedules[class_] = schedule;
@@ -284,7 +361,7 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, std::map<size_t
 	return true;
 }
 
-bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, std::map<size_t, rate_t>>& schedules, std::list<ip_t>& ips)
+bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, schedule_t>& schedules, std::list<ip_t>& ips)
 {
 	auto s = HalonMTA_config_object_get(cfg, "ips");
 	if (!s)
