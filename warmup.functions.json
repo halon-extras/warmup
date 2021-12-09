@@ -1,0 +1,18 @@
+[
+    {
+        "name": "warmup_ips",
+        "parameters": {
+            "optional": [
+                {
+                    "name": "class",
+                    "type": "string"
+                }
+            ]
+        },
+        "returnType": "array",
+        "detail": "warmup_ips([string $class]): array ",
+        "value": "warmup_ips($0)",
+        "documentation": "Get all the warmup IP-addresses or only those for a specific class.",
+        "link": "[Full documentation](https://github.com/halon-extras/warmup)"
+    }
+]

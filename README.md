@@ -3,7 +3,23 @@
 The IP warmup plugin can be used to schedule / ramp up traffic on newly added IPs.
 Depending on the age (```added``` property) and the ```schedules``` traffic volumes are automatically calculated and controlled using dynamic policies.
 
-## Configuration example
+## Installation
+
+Follow the [instructions](https://docs.halon.io/manual/comp_install.html#installation) in our manual to add our package repository and then run the below command.
+
+### Ubuntu
+
+```
+apt-get install halon-extras-warmup
+```
+
+### RHEL
+
+```
+yum install halon-extras-warmup
+```
+
+## Configuration
 
 The schedule can be specified in both smtpd.yaml or smtpd-app.yaml for your convenience.
 
@@ -12,7 +28,6 @@ The schedule can be specified in both smtpd.yaml or smtpd-app.yaml for your conv
 ```
 plugins:
   - id: warmup
-    path: /opt/halon/plugins/warmup.so
     config:
       schedules:
         - class: slow_warmup
@@ -72,3 +87,17 @@ Try(
 	]
 );
 ```
+
+## Exported functions
+
+### warmup_ips([class])
+
+Get all the warmup IP-addresses or only those for a specific class.
+
+**Params**
+
+- class `string` - The class
+
+**Returns**
+
+An array of the warmup IP-addresses.

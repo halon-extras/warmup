@@ -1,0 +1,37 @@
+services:
+  ubuntu-20.04:
+    build:
+      context: ./ubuntu-20.04
+      dockerfile: ./Dockerfile
+      args:
+        HALON_REPO_USER: ${HALON_REPO_USER}
+        HALON_REPO_PASS: ${HALON_REPO_PASS}
+    volumes:
+      - ../:/plugin
+  ubuntu-18.04:
+    build:
+      context: ./ubuntu-18.04
+      dockerfile: ./Dockerfile
+      args:
+        HALON_REPO_USER: ${HALON_REPO_USER}
+        HALON_REPO_PASS: ${HALON_REPO_PASS}
+    volumes:
+      - ../:/plugin
+  centos-8:
+    build:
+      context: ./centos-8
+      dockerfile: ./Dockerfile
+      args:
+        HALON_REPO_USER: ${HALON_REPO_USER}
+        HALON_REPO_PASS: ${HALON_REPO_PASS}
+    volumes:
+      - ../:/plugin
+  centos-7:
+    build:
+      context: ./centos-7
+      dockerfile: ./Dockerfile
+      args:
+        HALON_REPO_USER: ${HALON_REPO_USER}
+        HALON_REPO_PASS: ${HALON_REPO_PASS}
+    volumes:
+      - ../:/plugin
