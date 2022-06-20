@@ -1,0 +1,21 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "make",
+            "type": "shell",
+            "command": "mkdir -p ${workspaceFolder}/build/vscode && cd ${workspaceFolder}/build/vscode && cmake ${workspaceFolder} && make",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "make install",
+            "type": "shell",
+            "command": "mkdir -p ${workspaceFolder}/build/vscode && cd ${workspaceFolder}/build/vscode && cmake ${workspaceFolder} && make && make install",
+            "problemMatcher": []
+        }
+    ]
+}

@@ -1,0 +1,36 @@
+environment:
+  controlsocket:
+    chmod: '0660'
+    group: staff
+  privdrop:
+    group: halon
+    user: halon
+  rlimit:
+    nofile: 70000
+  umask: '0027'
+  uuid:
+    version: 4
+plugins:
+- config:
+    schedules:
+    - class: slow_warmup
+      fields:
+      - localip
+      - remotemx: '#google'
+      interval: 3600
+      schedule:
+      - day: 0
+        messages: 10
+      - day: 1
+        messages: 20
+      - day: 2
+        messages: 30
+      - day: 3
+        messages: 40
+  id: warmup
+servers:
+- id: default
+  listeners:
+  - address: 127.0.0.1
+    port: 25
+version: '5.8'

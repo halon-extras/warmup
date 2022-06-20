@@ -1,0 +1,15 @@
+version: '2'
+services:
+  halon-smtpd:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+      args:
+        HALON_REPO_USER: ${HALON_REPO_USER}
+        HALON_REPO_PASS: ${HALON_REPO_PASS}
+    volumes:
+      - ../:/warmup
+      - ./smtpd/dist:/etc/halon
+      - halon-spool:/var/spool/halon
+volumes:
+  halon-spool:

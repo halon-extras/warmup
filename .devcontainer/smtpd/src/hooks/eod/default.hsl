@@ -1,0 +1,10 @@
+$transactionid = $transaction["id"];
+$sender = $transaction["senderaddress"];
+$recipients = $transaction["recipients"];
+$mail = $arguments["mail"];
+
+// Queue message for all recipients
+foreach ($recipients as $recipient)
+    $mail->queue($sender, $recipient["address"], $recipient["transportid"]);
+
+Accept();

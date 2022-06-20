@@ -1,0 +1,53 @@
+plugins:
+- config:
+    ips:
+    - added: '2021-03-10'
+      class: slow_warmup
+      ip: 10.1.1.1
+  id: warmup
+resolver:
+  cache:
+    size: 10000
+scripting:
+  files: []
+  hooks:
+    eod:
+    - data: |
+        $transactionid = $transaction["id"];
+        $sender = $transaction["senderaddress"];
+        $recipients = $transaction["recipients"];
+        $mail = $arguments["mail"];
+
+        // Queue message for all recipients
+        foreach ($recipients as $recipient)
+            $mail->queue($sender, $recipient["address"], $recipient["transportid"]);
+
+        Accept();
+      id: default
+    predelivery: "Try(\n\t[\n\t\t\"sourceip\" => warmup_ips(),\n\t\t\"sourceip_random\"\
+      \ => false,\n\t]\n);"
+servers:
+- id: default
+  phases:
+    eod:
+      hook: default
+  transport: mx
+transportgroups:
+- connection:
+    sourceip:
+      ipv6: false
+  id: default
+  retry:
+    count: 30
+    intervals:
+    - interval: 60
+    - interval: 900
+    - interval: 3600
+    - interval: 7200
+    - interval: 10800
+  transports:
+  - id: mx
+    session:
+      tls:
+        mode: dane
+version: '5.8'

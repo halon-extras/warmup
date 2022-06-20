@@ -1,0 +1,8 @@
+policies:
+- fields:
+  - localip
+  - remotemx:
+      google:
+      - '*.gmail.com'
+      - '*.google.com'
+version: '5.9'
