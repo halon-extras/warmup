@@ -65,7 +65,7 @@ plugins:
 
 ### smtpd-policy.yaml
 
-A example warmup with google mx'es grouped.
+A example policy with google mx'es grouped.
 
 ```
 - fields:
