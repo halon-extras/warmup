@@ -31,6 +31,9 @@ plugins:
     config:
       schedules:
         - class: slow_warmup
+          fields:
+            - localip
+            - remotemx: "#google"
           interval: 3600
           schedule:
             - day: 0
@@ -56,9 +59,6 @@ plugins:
       ips:
         - ip: 10.1.1.1
           class: slow_warmup
-          fields:
-            - localip
-            - remotemx: "#google"
           added: 2021-03-10
 ```
 
