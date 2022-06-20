@@ -48,9 +48,7 @@ plugins:
 
 ### smtpd-app.yaml
 
-The same IP can be added to multiple classes. The default field is localip.
-
-A example warmup only applying to the google mx'es.
+The same IP can be added to multiple classes.
 
 ```
 plugins:
