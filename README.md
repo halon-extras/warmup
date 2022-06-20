@@ -22,6 +22,7 @@ yum install halon-extras-warmup
 ## Configuration
 
 The schedule can be specified in both smtpd.yaml or smtpd-app.yaml for your convenience.
+The default field is localip.
 
 ### smtpd.yaml
 
