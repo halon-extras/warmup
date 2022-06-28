@@ -60,7 +60,7 @@ plugins:
       ips:
         - ip: 10.1.1.1
           class: slow_warmup
-          added: 2021-03-10
+          added: "2021-03-10"
 ```
 
 ### smtpd-policy.yaml
