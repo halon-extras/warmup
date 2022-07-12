@@ -78,6 +78,7 @@ bool Halon_early_init(HalonInitContext* hic)
 	return true;
 }
 
+HALON_EXPORT
 bool Halon_init(HalonInitContext* hic)
 {
 	update_rates();
