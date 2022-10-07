@@ -234,6 +234,7 @@ HALON_EXPORT
 bool Halon_hsl_register(HalonHSLRegisterContext* ptr)
 {
 	HalonMTA_hsl_register_function(ptr, "warmup_ips", &warmup_ips);
+	HalonMTA_hsl_module_register_function(ptr, "warmup_ips", &warmup_ips);
 	return true;
 }
 

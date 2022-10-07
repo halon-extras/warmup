@@ -81,6 +81,8 @@ A example policy with google mx'es grouped.
 In the pre-delivery context, make use to configured IP's (may also be used to filter a specific class ```warmup_ips([class])```).
 
 ```
+import { warmup_ips } from "extras://warmup";
+
 Try(
 	[
 		"sourceip" => warmup_ips(),
