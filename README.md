@@ -93,6 +93,8 @@ Try(
 
 ## Exported functions
 
+These functions needs to be [imported](https://docs.halon.io/hsl/structures.html#import) from the `extras://warmup` module path.
+
 ### warmup_ips([class])
 
 Get all the warmup IP-addresses or only those for a specific class.
