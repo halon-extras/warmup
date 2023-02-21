@@ -37,7 +37,7 @@ struct added_t
 	double interval;
 };
 
-std::map<std::string, schedule_t> schedules;
+std::map<std::string, schedule_t> schedules, schedules_smtpd, schedules_smtpd_app;
 std::list<ip_t> ips;
 std::mutex lock;
 std::map<std::pair<std::string, std::string>, added_t> policies;
@@ -56,15 +56,15 @@ bool Halon_early_init(HalonInitContext* hic)
 	HalonMTA_init_getinfo(hic, HALONMTA_INIT_CONFIG, nullptr, 0, &cfg, nullptr);
 	HalonMTA_init_getinfo(hic, HALONMTA_INIT_APPCONFIG, nullptr, 0, &app, nullptr);
 
-	if (!parseConfigSchedule(app, schedules))
-		if (!parseConfigSchedule(cfg, schedules))
-			return false;
-
-	if (schedules.empty())
-	{
-		syslog(LOG_CRIT, "No schedules");
+	if (!parseConfigSchedule(cfg, schedules_smtpd))
 		return false;
-	}
+
+	if (!parseConfigSchedule(app, schedules_smtpd_app))
+		return false;
+
+	schedules = schedules_smtpd;
+	for (const auto & schedule : schedules_smtpd_app)
+		schedules[schedule.first] = schedule.second;
 
 	if (!parseConfigIPs(app, schedules, ips))
 		return false;
@@ -107,7 +107,12 @@ void Halon_config_reload(HalonConfig* hc)
 
 		std::map<std::string, schedule_t> schedules2;
 		if (parseConfigSchedule(hc, schedules2))
-			schedules = schedules2;
+		{
+			schedules_smtpd_app = schedules2;
+			schedules = schedules_smtpd;
+			for (const auto & schedule : schedules_smtpd_app)
+				schedules[schedule.first] = schedule.second;
+		}
 
 		std::list<ip_t> ips_new;
 		if (parseConfigIPs(hc, schedules, ips_new))
@@ -335,7 +340,7 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& sc
 {
 	auto s = HalonMTA_config_object_get(cfg, "schedules");
 	if (!s)
-		return false;
+		return true;
 
 	size_t x = 0;
 	HalonConfig* d;
@@ -408,10 +413,6 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& sc
 
 		schedules[class_] = schedule;
 	}
-
-	if (schedules.empty())
-		return false;
-
 	return true;
 }
 
@@ -419,7 +420,7 @@ bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, schedule_t>& s
 {
 	auto s = HalonMTA_config_object_get(cfg, "ips");
 	if (!s)
-		return false;
+		return true;
 
 	size_t l = 0;
 	HalonConfig* d;
