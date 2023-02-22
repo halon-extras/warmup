@@ -371,7 +371,7 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& sc
 						{ HALONMTA_QUEUE_LOCALIP, "localip" },
 						{ HALONMTA_QUEUE_REMOTEIP, "remoteip" },
 						{ HALONMTA_QUEUE_REMOTEMX, "remotemx" },
-						{ HALONMTA_QUEUE_RECIPIENTDOMAIN, "domain" },
+						{ HALONMTA_QUEUE_RECIPIENTDOMAIN, "recipientdomain" },
 						{ HALONMTA_QUEUE_JOBID, "jobid" }
 					})
 				{
