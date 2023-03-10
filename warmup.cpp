@@ -299,8 +299,12 @@ readd:
 					(ifi = schedule->second.if_.find(HALONMTA_QUEUE_JOBID)) != schedule->second.if_.end()
 					? ifi->second.c_str()
 					: nullptr;
+				const char* grouping =
+					(ifi = schedule->second.if_.find(HALONMTA_QUEUE_GROUPING)) != schedule->second.if_.end()
+					? ifi->second.c_str()
+					: nullptr;
 
-				auto p = HalonMTA_queue_policy_add(schedule->second.fields, transportid, ip_.ip.c_str(), remoteip, remotemx, recipientdomain, jobid, 0, messages, interval, std::string(std::string("Day_") + std::to_string(days)).c_str(), 0);
+				auto p = HalonMTA_queue_policy_add3(schedule->second.fields, transportid, ip_.ip.c_str(), remoteip, remotemx, recipientdomain, jobid, grouping, 0, messages, interval, std::string(std::string("Day_") + std::to_string(days)).c_str(), null, 0, false, 0);
 				if (!p)
 					syslog(LOG_CRIT, "WarmUP: failed to add policy for ip:%s class:%s days:%ld rate:%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, messages, interval);
 				else
@@ -372,7 +376,8 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& sc
 						{ HALONMTA_QUEUE_REMOTEIP, "remoteip" },
 						{ HALONMTA_QUEUE_REMOTEMX, "remotemx" },
 						{ HALONMTA_QUEUE_RECIPIENTDOMAIN, "recipientdomain" },
-						{ HALONMTA_QUEUE_JOBID, "jobid" }
+						{ HALONMTA_QUEUE_JOBID, "jobid" },
+						{ HALONMTA_QUEUE_GROUPING, "grouping" }
 					})
 				{
 					auto o = HalonMTA_config_object_get(i, m.second);

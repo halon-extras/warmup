@@ -55,7 +55,7 @@
                 "oneOf": [
                     {
                         "type": "string",
-                        "enum": ["jobid", "localip", "remoteip", "transportid", "recipientdomain", "remotemx"]
+                        "enum": ["jobid", "grouping", "localip", "remoteip", "transportid", "recipientdomain", "remotemx"]
                     },
                     {
                         "type": "object",
@@ -64,6 +64,9 @@
                         "maxProperties": 1,
                         "properties": {
                             "jobid": {
+                                "type": "string"
+                            },
+                            "grouping": {
                                 "type": "string"
                             },
                             "remoteip": {
