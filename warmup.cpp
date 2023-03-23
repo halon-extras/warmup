@@ -308,8 +308,10 @@ readd:
 				if (!p)
 					syslog(LOG_CRIT, "WarmUP: failed to add policy for ip:%s class:%s days:%ld rate:%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, messages, interval);
 				else
+				{
 					syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld rate:%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, messages, interval);
-				policies[{ ip_.class_, ip_.ip }] = { p, schedule->second.fields, schedule->second.if_, messages, interval };
+					policies[{ ip_.class_, ip_.ip }] = { p, schedule->second.fields, schedule->second.if_, messages, interval };
+				}
 			}
 		}
 		else
