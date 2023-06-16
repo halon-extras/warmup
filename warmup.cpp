@@ -84,6 +84,7 @@ bool Halon_init(HalonInitContext* hic)
 	update_rates();
 
 	p = std::thread([] {
+		pthread_setname_np(pthread_self(), "p/warmup/update");
 		while (true)
 		{
 			for (size_t i = 0; i < 5 && !stop; ++i)
