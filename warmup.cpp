@@ -9,6 +9,7 @@
 #include <map>
 #include <mutex>
 #include <cstring>
+#include <string>
 
 struct rate_t
 {

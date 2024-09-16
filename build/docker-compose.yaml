@@ -1,4 +1,13 @@
 services:
+  ubuntu-24.04:
+    build:
+      context: ./ubuntu-24.04
+      dockerfile: ./Dockerfile
+      args:
+        HALON_REPO_USER: ${HALON_REPO_USER}
+        HALON_REPO_PASS: ${HALON_REPO_PASS}
+    volumes:
+      - ../:/plugin
   ubuntu-22.04:
     build:
       context: ./ubuntu-22.04
