@@ -21,10 +21,10 @@ yum install halon-extras-warmup
 
 ## Configuration
 
-The schedule can be specified in both smtpd.yaml or smtpd-app.yaml for your convenience.
-The default field is localip.
+The schedule can be specified in both `smtpd.yaml` or `smtpd-app.yaml` for your convenience.
+The default field is `localip`.
 
-A example warmup only applying to the google mx'es.
+A example warmup only applying to the google `grouping`.
 
 ### smtpd.yaml
 
@@ -66,24 +66,10 @@ plugins:
 ### smtpd-policy.yaml
 
 ```
-- fields:
-  - localip
-  - grouping
-```
-
-### Pre-delivery script hook
-
-In the pre-delivery context, make use to configured IP's (may also be used to filter a specific class ```warmup_ips([class])```).
-
-```
-import { warmup_ips } from "extras://warmup";
-
-Try(
-	[
-		"sourceip" => warmup_ips(),
-		"sourceip_random" => false,
-	]
-);
+policies:
+  - fields:
+    - localip
+    - grouping
 ```
 
 ## Exported functions
