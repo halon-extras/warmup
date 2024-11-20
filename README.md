@@ -36,7 +36,7 @@ plugins:
         - class: slow_warmup
           fields:
             - localip
-            - remotemx: "#google"
+            - grouping: "&google"
           interval: 3600
           schedule:
             - day: 0
@@ -65,15 +65,10 @@ plugins:
 
 ### smtpd-policy.yaml
 
-A example policy with google mx'es grouped.
-
 ```
 - fields:
   - localip
-  - remotemx:
-      google:
-      - '*.gmail.com'
-      - '*.google.com'
+  - grouping
 ```
 
 ### Pre-delivery script hook
