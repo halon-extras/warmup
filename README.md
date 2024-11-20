@@ -21,12 +21,11 @@ yum install halon-extras-warmup
 
 ## Configuration
 
-The schedule can be specified in both `smtpd.yaml` or `smtpd-app.yaml` for your convenience.
-The default field is `localip`.
+The default field is `localip`. The same `ip` can be added to multiple classes.
 
-A example warmup only applying to the google `grouping`.
+Below is an example where warmup is only applied for the google `grouping`.
 
-### smtpd.yaml
+### smtpd-app.yaml
 
 ```
 plugins:
@@ -47,16 +46,6 @@ plugins:
               messages: 30
             - day: 3
               messages: 40
-```
-
-### smtpd-app.yaml
-
-The same IP can be added to multiple classes.
-
-```
-plugins:
-  - id: warmup
-    config:
       ips:
         - ip: 10.1.1.1
           class: slow_warmup
