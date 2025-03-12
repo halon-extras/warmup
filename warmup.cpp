@@ -38,17 +38,17 @@ struct added_t
 	double interval;
 };
 
-std::map<std::string, schedule_t> schedules, schedules_smtpd, schedules_smtpd_app;
-std::list<ip_t> ips;
-std::mutex lock;
-std::map<std::pair<std::string, std::string>, added_t> policies;
+static std::map<std::string, schedule_t> schedules, schedules_smtpd, schedules_smtpd_app;
+static std::list<ip_t> ips;
+static std::mutex lock;
+static std::map<std::pair<std::string, std::string>, added_t> policies;
 
-bool stop = false;
-std::thread p;
+static bool stop = false;
+static std::thread p;
 
-bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& schedules);
-bool parseConfigIPs(HalonConfig*, const std::map<std::string, schedule_t>& schedules, std::list<ip_t>&);
-void update_rates();
+static bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& schedules);
+static bool parseConfigIPs(HalonConfig*, const std::map<std::string, schedule_t>& schedules, std::list<ip_t>&);
+static void update_rates();
 
 HALON_EXPORT
 bool Halon_early_init(HalonInitContext* hic)
