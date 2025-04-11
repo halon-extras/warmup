@@ -305,8 +305,17 @@ readd:
 					(ifi = schedule->second.if_.find(HALONMTA_QUEUE_GROUPING)) != schedule->second.if_.end()
 					? ifi->second.c_str()
 					: nullptr;
+				const char* tenantid =
+					(ifi = schedule->second.if_.find(HALONMTA_QUEUE_TENANTID)) != schedule->second.if_.end()
+					? ifi->second.c_str()
+					: nullptr;
 
-				auto p = HalonMTA_queue_policy_add3(schedule->second.fields, transportid, ip_.ip.c_str(), remoteip, remotemx, recipientdomain, jobid, grouping, 0, messages, interval, std::string(std::string("Day_") + std::to_string(days)).c_str(), nullptr, 0, false, 0);
+				auto p = HalonMTA_queue_policy_add4(schedule->second.fields, transportid, ip_.ip.c_str(), remoteip, remotemx, recipientdomain, jobid, grouping, tenantid,
+						0, messages, interval,
+						std::string(std::string("Day_") + std::to_string(days)).c_str(),
+						nullptr, 0,
+						false,
+						0);
 				if (!p)
 					syslog(LOG_CRIT, "WarmUP: failed to add policy for ip:%s class:%s days:%ld rate:%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, messages, interval);
 				else
@@ -335,7 +344,11 @@ readd:
 			}
 			else if (it->second.messages != messages || it->second.interval != interval)
 			{
-				HalonMTA_queue_policy_update(it->second.id, 0, messages, interval, std::string(std::string("Day_") + std::to_string(days)).c_str(), 0);
+				HalonMTA_queue_policy_update2(it->second.id,
+						0, messages, interval,
+						std::string(std::string("Day_") + std::to_string(days)).c_str(),
+						nullptr, 0,
+						0);
 				syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld rate:%zu/%f->%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, it->second.messages, it->second.interval, messages, interval);
 				it->second.messages = messages;
 				it->second.interval = interval;
@@ -381,7 +394,8 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& sc
 						{ HALONMTA_QUEUE_REMOTEMX, "remotemx" },
 						{ HALONMTA_QUEUE_RECIPIENTDOMAIN, "recipientdomain" },
 						{ HALONMTA_QUEUE_JOBID, "jobid" },
-						{ HALONMTA_QUEUE_GROUPING, "grouping" }
+						{ HALONMTA_QUEUE_GROUPING, "grouping" },
+						{ HALONMTA_QUEUE_TENANTID, "tenantid" }
 					})
 				{
 					auto o = HalonMTA_config_object_get(i, m.second);

@@ -29,7 +29,7 @@
                 "oneOf": [
                     {
                         "type": "string",
-                        "enum": ["jobid", "grouping", "localip", "remoteip", "transportid", "recipientdomain", "remotemx"]
+                        "enum": ["jobid", "grouping", "tenantid", "localip", "remoteip", "transportid", "recipientdomain", "remotemx"]
                     },
                     {
                         "type": "object",
@@ -38,9 +38,12 @@
                         "maxProperties": 1,
                         "properties": {
                             "jobid": {
-                                "type": "string"
+                              "type": "string"
                             },
                             "grouping": {
+                              "type": "string"
+                            },
+                            "tenantid": {
                               "type": "string"
                             },
                             "remoteip": {
