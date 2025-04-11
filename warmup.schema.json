@@ -63,6 +63,10 @@
                 ]
             }
           },
+          "properties": {
+            "type": "object",
+            "additionalProperties": true
+          },
           "schedule": {
             "type": "array",
             "description": "The data",
@@ -83,6 +87,10 @@
                 },
                 "interval": {
                   "type": "number"
+                },
+                "properties": {
+                  "type": "object",
+                  "additionalProperties": true
                 }
               }
             }

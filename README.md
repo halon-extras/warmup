@@ -37,9 +37,13 @@ plugins:
             - localip
             - grouping: "&google"
           interval: 3600
+          properties:
+            foo: bar
           schedule:
             - day: 0
               messages: 10
+              properties:
+                foo: bar2
             - day: 1
               messages: 20
             - day: 2

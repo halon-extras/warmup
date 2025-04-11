@@ -10,11 +10,13 @@
 #include <mutex>
 #include <cstring>
 #include <string>
+#include <vector>
 
-struct rate_t
+struct day_t
 {
 	size_t messages;
 	double interval;
+	std::map<std::string, std::string> props;
 };
 struct ip_t
 {
@@ -27,7 +29,7 @@ struct schedule_t
 {
 	int fields = HALONMTA_QUEUE_LOCALIP;
 	std::map<int, std::string> if_;
-	std::map<size_t, rate_t> days;
+	std::map<size_t, day_t> days;
 };
 struct added_t
 {
@@ -36,6 +38,7 @@ struct added_t
 	std::map<int, std::string> if_;
 	size_t messages;
 	double interval;
+	std::map<std::string, std::string> props;
 };
 
 static std::map<std::string, schedule_t> schedules, schedules_smtpd, schedules_smtpd_app;
@@ -263,6 +266,7 @@ void update_rates()
 		size_t messages = 0;
 		double interval = 0;
 		size_t days = 0;
+		std::map<std::string, std::string> props;
 
 		auto schedule = schedules.find(ip_.class_);
 		for (auto s = schedule->second.days.rbegin(); s != schedule->second.days.rend(); s++)
@@ -272,6 +276,14 @@ void update_rates()
 			days = s->first;
 			messages = s->second.messages;
 			interval = s->second.interval;
+			props = s->second.props;
+		}
+
+		std::vector<const char*> propv;
+		for (const auto & prop : props)
+		{
+			propv.push_back(prop.first.c_str());
+			propv.push_back(prop.second.c_str());
 		}
 
 		auto it = policies.find({ ip_.class_, ip_.ip });
@@ -313,7 +325,7 @@ readd:
 				auto p = HalonMTA_queue_policy_add4(schedule->second.fields, transportid, ip_.ip.c_str(), remoteip, remotemx, recipientdomain, jobid, grouping, tenantid,
 						0, messages, interval,
 						std::string(std::string("Day_") + std::to_string(days)).c_str(),
-						nullptr, 0,
+						&propv[0], propv.size(),
 						false,
 						0);
 				if (!p)
@@ -321,7 +333,7 @@ readd:
 				else
 				{
 					syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld rate:%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, messages, interval);
-					policies[{ ip_.class_, ip_.ip }] = { p, schedule->second.fields, schedule->second.if_, messages, interval };
+					policies[{ ip_.class_, ip_.ip }] = { p, schedule->second.fields, schedule->second.if_, messages, interval, props };
 				}
 			}
 		}
@@ -342,16 +354,17 @@ readd:
 				policies.erase(it);
 				goto readd;
 			}
-			else if (it->second.messages != messages || it->second.interval != interval)
+			else if (it->second.messages != messages || it->second.interval != interval || it->second.props != props)
 			{
 				HalonMTA_queue_policy_update2(it->second.id,
 						0, messages, interval,
 						std::string(std::string("Day_") + std::to_string(days)).c_str(),
-						nullptr, 0,
+						&propv[0], propv.size(),
 						0);
 				syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld rate:%zu/%f->%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, it->second.messages, it->second.interval, messages, interval);
 				it->second.messages = messages;
 				it->second.interval = interval;
+				it->second.props = props;
 			}
 		}
 	}
@@ -413,6 +426,24 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& sc
 			}
 		}
 
+		std::map<std::string, std::string> props;
+		auto properties = HalonMTA_config_object_get(d, "properties");
+		if (properties)
+		{
+			HalonConfig* prop;
+			size_t p = 0;
+			while ((prop = HalonMTA_config_object_key_get(properties, p++)))
+			{
+				const char* k = HalonMTA_config_string_get(prop, nullptr);
+				if (!k)
+					continue;
+				const char* v = HalonMTA_config_string_get(HalonMTA_config_object_get(properties, k), nullptr);
+				if (!v)
+					continue;
+				props.insert({ k, v });
+			}
+		}
+
 		l = 0;
 		while ((i = HalonMTA_config_array_get(s, l++)))
 		{
@@ -425,9 +456,27 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& sc
 				return false;
 			}
 
-			rate_t r;
+			day_t r;
 			r.messages = strtoul(messages, nullptr, 10);
 			r.interval = interval ? strtod(interval, nullptr) : interval_ ? strtod(interval_, nullptr) : 3600;
+			r.props = props;
+
+			auto properties = HalonMTA_config_object_get(i, "properties");
+			if (properties)
+			{
+				HalonConfig* prop;
+				size_t p = 0;
+				while ((prop = HalonMTA_config_object_key_get(properties, p++)))
+				{
+					const char* k = HalonMTA_config_string_get(prop, nullptr);
+					if (!k)
+						continue;
+					const char* v = HalonMTA_config_string_get(HalonMTA_config_object_get(properties, k), nullptr);
+					if (!v)
+						continue;
+					r.props[k] = v;
+				}
+			}
 			schedule.days[strtoul(day, nullptr, 10)] = r;
 		}
 
