@@ -65,6 +65,22 @@ policies:
     - grouping
 ```
 
+### How it works
+
+The configuration provides a warmup schedule that is independent of config reloads and service restarts.
+
+The current host date/time is compared against the IPs `added` property, to select which `day` applies. The `messages` property specifies the volume which will be attempted on the named warmup `class` over the defined `interval`.
+
+So, in the above example, `day: 3` begins at `00:00` on `2021-03-13` (server locale) and ends when the server date becomes `2021-03-14`. Each localip will be used for delivery attempts to destinations belonging to grouping `&google` for _up to_ 40 messages per hour.
+
+To reach this target volume, there needs to be sufficient messages in queue that are eligible for delivery.
+
+Messages over the target volume can overflow to other addresses defined in the transport.
+
+If IP selection is done in your configuration via the usual `transports` and `addresses` method, then no HSL work is needed. If you wish to customize IP selection (in pre-delivery HSL script) then the below function can be used to obtain IPs.
+
+The warmup configuration can be defined before the IP(s) are added to active transports, ensuring a controlled start to the traffic from those IP(s).
+
 ## Exported functions
 
 These functions needs to be [imported](https://docs.halon.io/hsl/structures.html#import) from the `extras://warmup` module path.
@@ -80,3 +96,5 @@ Get all the warmup IP-addresses or only those for a specific class.
 **Returns**
 
 An array of the warmup IP-addresses.
+
+The `properties` defined in the warmup class or day schedule are available to the post-delivery hook, see [Policies](https://docs.halon.io/hsl/postdelivery.html#policies).
