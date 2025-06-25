@@ -97,4 +97,4 @@ Get all the warmup IP-addresses or only those for a specific class.
 
 An array of the warmup IP-addresses.
 
-Any `properties` are defined in the warmup class or day schedule are available in the returned result.
+The `properties` defined in the warmup class or day schedule are available in the returned result.
