@@ -322,12 +322,12 @@ readd:
 					? ifi->second.c_str()
 					: nullptr;
 
-				auto p = HalonMTA_queue_policy_add4(schedule->second.fields, transportid, ip_.ip.c_str(), remoteip, remotemx, recipientdomain, jobid, grouping, tenantid,
-						0, messages, interval,
+				auto p = HalonMTA_queue_policy_add6(nullptr, schedule->second.fields, HALONMTA_POLICY_TYPE_WARMUP, transportid, ip_.ip.c_str(), remoteip, remotemx, recipientdomain, jobid, grouping, tenantid,
+						0, messages, interval, HALONMTA_RATE_ALGORITHM_DEFAULT, 0,
 						std::string(std::string("Day_") + std::to_string(days)).c_str(),
 						&propv[0], propv.size(),
 						false,
-						0);
+						true, 0);
 				if (!p)
 					syslog(LOG_CRIT, "WarmUP: failed to add policy for ip:%s class:%s days:%ld rate:%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, messages, interval);
 				else
