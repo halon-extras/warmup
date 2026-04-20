@@ -35,15 +35,6 @@ services:
         HALON_REPO_PASS: ${HALON_REPO_PASS}
     volumes:
       - ../:/plugin
-  centos-7:
-    build:
-      context: ./centos-7
-      dockerfile: ./Dockerfile
-      args:
-        HALON_REPO_USER: ${HALON_REPO_USER}
-        HALON_REPO_PASS: ${HALON_REPO_PASS}
-    volumes:
-      - ../:/plugin
   azure-3:
     build:
       context: ./azure-3
