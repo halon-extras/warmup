@@ -6,6 +6,8 @@ services:
       args:
         HALON_REPO_USER: ${HALON_REPO_USER}
         HALON_REPO_PASS: ${HALON_REPO_PASS}
+      platforms:
+        - linux/amd64
     volumes:
       - ../:/plugin
   ubuntu-22.04:
@@ -15,6 +17,8 @@ services:
       args:
         HALON_REPO_USER: ${HALON_REPO_USER}
         HALON_REPO_PASS: ${HALON_REPO_PASS}
+      platforms:
+        - linux/amd64
     volumes:
       - ../:/plugin
   rocky-9:
@@ -24,6 +28,8 @@ services:
       args:
         HALON_REPO_USER: ${HALON_REPO_USER}
         HALON_REPO_PASS: ${HALON_REPO_PASS}
+      platforms:
+        - linux/amd64
     volumes:
       - ../:/plugin
   centos-8:
@@ -33,6 +39,8 @@ services:
       args:
         HALON_REPO_USER: ${HALON_REPO_USER}
         HALON_REPO_PASS: ${HALON_REPO_PASS}
+      platforms:
+        - linux/amd64
     volumes:
       - ../:/plugin
   azure-3:
@@ -42,5 +50,7 @@ services:
       args:
         HALON_REPO_USER: ${HALON_REPO_USER}
         HALON_REPO_PASS: ${HALON_REPO_PASS}
+      platforms:
+        - linux/amd64
     volumes:
       - ../:/plugin

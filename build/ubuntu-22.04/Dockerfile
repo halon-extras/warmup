@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 ubuntu:22.04
+FROM ubuntu:22.04
 LABEL org.opencontainers.image.authors="support@halon.io"
 
 ARG TARGETARCH

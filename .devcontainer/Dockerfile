@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 ubuntu:24.04
+FROM ubuntu:24.04
 LABEL org.opencontainers.image.authors="support@halon.io"
 
 ARG HALON_REPO_USER

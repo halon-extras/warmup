@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 rockylinux:9
+FROM rockylinux:9
 LABEL org.opencontainers.image.authors="support@halon.io"
 
 ARG TARGETARCH

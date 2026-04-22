@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 mcr.microsoft.com/azurelinux/base/core:3.0
+FROM mcr.microsoft.com/azurelinux/base/core:3.0
 LABEL org.opencontainers.image.authors="support@halon.io"
 
 ARG TARGETARCH
