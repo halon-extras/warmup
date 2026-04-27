@@ -1,4 +1,15 @@
 services:
+  # ubuntu-26.04:
+  #   build:
+  #     context: ./ubuntu-26.04
+  #     dockerfile: ./Dockerfile
+  #     args:
+  #       HALON_REPO_USER: ${HALON_REPO_USER}
+  #       HALON_REPO_PASS: ${HALON_REPO_PASS}
+  #     platforms:
+  #       - linux/amd64
+  #   volumes:
+  #     - ../:/plugin
   ubuntu-24.04:
     build:
       context: ./ubuntu-24.04
