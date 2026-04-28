@@ -32,6 +32,17 @@ services:
         - linux/amd64
     volumes:
       - ../:/plugin
+  # rocky-10:
+  #   build:
+  #     context: ./rocky-10
+  #     dockerfile: ./Dockerfile
+  #     args:
+  #       HALON_REPO_USER: ${HALON_REPO_USER}
+  #       HALON_REPO_PASS: ${HALON_REPO_PASS}
+  #     platforms:
+  #       - linux/amd64
+  #   volumes:
+  #     - ../:/plugin
   rocky-9:
     build:
       context: ./rocky-9
