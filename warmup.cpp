@@ -50,8 +50,8 @@ static std::map<std::pair<std::string, std::string>, added_t> policies;
 static std::atomic<bool> stop(false);
 static std::thread update_thread;
 
-static bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& schedules);
-static bool parseConfigIPs(HalonConfig*, const std::map<std::string, schedule_t>& schedules, std::list<ip_t>&);
+static bool parseConfigSchedule(HalonConfig*, std::map<std::string, schedule_t>&);
+static bool parseConfigIPs(HalonConfig*, const std::map<std::string, schedule_t>&, std::list<ip_t>&);
 static void update_rates();
 
 HALON_EXPORT
@@ -505,7 +505,7 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& sc
 	return true;
 }
 
-bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, schedule_t>& schedules, std::list<ip_t>& ips_)
+bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, schedule_t>& schedules_, std::list<ip_t>& ips_)
 {
 	auto s = HalonMTA_config_object_get(cfg, "ips");
 	if (!s)
@@ -525,7 +525,7 @@ bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, schedule_t>& s
 			return false;
 		}
 
-		if (schedules.find(class_) == schedules.end())
+		if (schedules_.find(class_) == schedules_.end())
 		{
 			syslog(LOG_CRIT, "No schedule for class %s", class_);
 			return false;
