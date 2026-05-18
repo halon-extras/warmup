@@ -11,6 +11,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <atomic>
 
 struct day_t
 {
@@ -46,7 +47,7 @@ static std::list<ip_t> ips;
 static std::mutex lock;
 static std::map<std::pair<std::string, std::string>, added_t> policies;
 
-static bool stop = false;
+static std::atomic<bool> stop(false);
 static std::thread update_thread;
 
 static bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& schedules);
