@@ -263,7 +263,7 @@ void update_rates()
 	time_t now = time(nullptr);
 	for (const auto & ip_ : ips)
 	{
-		ssize_t days_ = now < ip_.added ? 0 : (now - ip_.added) / (3600 * 24);
+		size_t days_ = now < ip_.added ? 0 : (now - ip_.added) / (3600 * 24);
 
 		size_t messages = 0;
 		double interval = 0;
