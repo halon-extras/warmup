@@ -47,7 +47,7 @@ static std::mutex lock;
 static std::map<std::pair<std::string, std::string>, added_t> policies;
 
 static bool stop = false;
-static std::thread p;
+static std::thread update_thread;
 
 static bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& schedules);
 static bool parseConfigIPs(HalonConfig*, const std::map<std::string, schedule_t>& schedules, std::list<ip_t>&);
@@ -87,7 +87,7 @@ bool Halon_init(HalonInitContext* hic)
 {
 	update_rates();
 
-	p = std::thread([] {
+	update_thread = std::thread([] {
 		pthread_setname_np(pthread_self(), "p/warmup/update");
 		while (true)
 		{
@@ -237,7 +237,8 @@ HALON_EXPORT
 void Halon_cleanup()
 {
 	stop = true;
-	p.join();
+	if (update_thread.joinable())
+		update_thread.join();
 }
 
 HALON_EXPORT
