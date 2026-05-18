@@ -340,7 +340,7 @@ readd:
 				auto p = HalonMTA_queue_policy_add6(nullptr, schedule->second.fields, policy_type, transportid, ip_.ip.c_str(), remoteip, remotemx, recipientdomain, jobid, grouping, tenantid,
 						0, messages, interval, HALONMTA_RATE_ALGORITHM_DEFAULT, 0,
 						std::string(std::string("Day_") + std::to_string(days)).c_str(),
-						&propv[0], propv.size(),
+						propv.size() ? &propv[0] : nullptr, propv.size(),
 						false,
 						true, 0);
 				if (!p)
@@ -374,7 +374,7 @@ readd:
 				HalonMTA_queue_policy_update2(it->second.id,
 						0, messages, interval,
 						std::string(std::string("Day_") + std::to_string(days)).c_str(),
-						&propv[0], propv.size(),
+						propv.size() ? &propv[0] : nullptr, propv.size(),
 						0);
 				syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld rate:%zu/%f->%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, it->second.messages, it->second.interval, messages, interval);
 				it->second.messages = messages;
