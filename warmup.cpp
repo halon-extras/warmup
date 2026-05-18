@@ -387,7 +387,7 @@ readd:
 	}
 }
 
-bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& schedules)
+bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& schedules_)
 {
 	auto ss = HalonMTA_config_object_get(cfg, "schedules");
 	if (!ss)
@@ -500,7 +500,7 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& sc
 		if (schedule.days.empty())
 			return false;
 
-		schedules[class_] = schedule;
+		schedules_[class_] = schedule;
 	}
 	return true;
 }
