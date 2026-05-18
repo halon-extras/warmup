@@ -269,6 +269,11 @@ void update_rates()
 		std::map<std::string, std::string> props;
 
 		auto schedule = schedules.find(ip_.class_);
+		if (schedule == schedules.end())
+		{
+			syslog(LOG_CRIT, "No schedule for class %s", ip_.class_.c_str());
+			continue;
+		}
 		for (auto s = schedule->second.days.rbegin(); s != schedule->second.days.rend(); s++)
 		{
 			if (days_ > s->first)
