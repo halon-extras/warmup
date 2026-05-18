@@ -478,17 +478,17 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& sc
 			r.interval = interval ? strtod(interval, nullptr) : interval_ ? strtod(interval_, nullptr) : 3600;
 			r.props = props;
 
-			auto properties = HalonMTA_config_object_get(i, "properties");
-			if (properties)
+			auto properties_ = HalonMTA_config_object_get(i, "properties");
+			if (properties_)
 			{
 				HalonConfig* prop;
 				size_t p = 0;
-				while ((prop = HalonMTA_config_object_key_get(properties, p++)))
+				while ((prop = HalonMTA_config_object_key_get(properties_, p++)))
 				{
 					const char* k = HalonMTA_config_string_get(prop, nullptr);
 					if (!k)
 						continue;
-					const char* v = HalonMTA_config_string_get(HalonMTA_config_object_get(properties, k), nullptr);
+					const char* v = HalonMTA_config_string_get(HalonMTA_config_object_get(properties_, k), nullptr);
 					if (!v)
 						continue;
 					r.props[k] = v;
