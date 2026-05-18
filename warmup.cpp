@@ -533,7 +533,12 @@ bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, schedule_t>& s
 
 		struct tm tm;
 		memset(&tm, 0, sizeof (tm));
-		strptime(added, "%Y-%m-%d", &tm);
+		char* end = strptime(added, "%Y-%m-%d", &tm);
+		if (!end || *end != '\0')
+		{
+			syslog(LOG_CRIT, "Bad date format: %s", added);
+			return false;
+		}
 
 		ip_t r;
 		r.ip = ip;
