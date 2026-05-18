@@ -505,7 +505,7 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& sc
 	return true;
 }
 
-bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, schedule_t>& schedules, std::list<ip_t>& ips)
+bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, schedule_t>& schedules, std::list<ip_t>& ips_)
 {
 	auto s = HalonMTA_config_object_get(cfg, "ips");
 	if (!s)
@@ -540,7 +540,7 @@ bool parseConfigIPs(HalonConfig* cfg, const std::map<std::string, schedule_t>& s
 		r.helo = helo ? helo : "";
 		r.class_ = class_;
 		r.added = mktime(&tm);
-		ips.push_back(r);
+		ips_.push_back(r);
 	}
 	return true;
 }
