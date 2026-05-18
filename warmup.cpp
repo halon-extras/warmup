@@ -322,7 +322,17 @@ readd:
 					? ifi->second.c_str()
 					: nullptr;
 
-				auto p = HalonMTA_queue_policy_add6(nullptr, schedule->second.fields, HALONMTA_POLICY_TYPE_WARMUP, transportid, ip_.ip.c_str(), remoteip, remotemx, recipientdomain, jobid, grouping, tenantid,
+				bool all_fields_have_values = true;
+				if ((schedule->second.fields & HALONMTA_QUEUE_TRANSPORTID) && !transportid) all_fields_have_values = false;
+				if ((schedule->second.fields & HALONMTA_QUEUE_REMOTEIP) && !remoteip) all_fields_have_values = false;
+				if ((schedule->second.fields & HALONMTA_QUEUE_REMOTEMX) && !remotemx) all_fields_have_values = false;
+				if ((schedule->second.fields & HALONMTA_QUEUE_RECIPIENTDOMAIN) && !recipientdomain) all_fields_have_values = false;
+				if ((schedule->second.fields & HALONMTA_QUEUE_JOBID) && !jobid) all_fields_have_values = false;
+				if ((schedule->second.fields & HALONMTA_QUEUE_GROUPING) && !grouping) all_fields_have_values = false;
+				if ((schedule->second.fields & HALONMTA_QUEUE_TENANTID) && !tenantid) all_fields_have_values = false;
+				const int policy_type = all_fields_have_values ? HALONMTA_POLICY_TYPE_WARMUP : HALONMTA_POLICY_TYPE_DYNAMIC;
+
+				auto p = HalonMTA_queue_policy_add6(nullptr, schedule->second.fields, policy_type, transportid, ip_.ip.c_str(), remoteip, remotemx, recipientdomain, jobid, grouping, tenantid,
 						0, messages, interval, HALONMTA_RATE_ALGORITHM_DEFAULT, 0,
 						std::string(std::string("Day_") + std::to_string(days)).c_str(),
 						&propv[0], propv.size(),
