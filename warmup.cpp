@@ -389,13 +389,13 @@ readd:
 
 bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& schedules)
 {
-	auto s = HalonMTA_config_object_get(cfg, "schedules");
-	if (!s)
+	auto ss = HalonMTA_config_object_get(cfg, "schedules");
+	if (!ss)
 		return true;
 
 	size_t x = 0;
 	HalonConfig* d;
-	while ((d = HalonMTA_config_array_get(s, x++)))
+	while ((d = HalonMTA_config_array_get(ss, x++)))
 	{
 		const char* class_ = HalonMTA_config_string_get(HalonMTA_config_object_get(d, "class"), nullptr);
 		const char* interval_ = HalonMTA_config_string_get(HalonMTA_config_object_get(d, "interval"), nullptr);
