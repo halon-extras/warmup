@@ -8,6 +8,8 @@
 #include <set>
 #include <map>
 #include <mutex>
+#include <algorithm>
+#include <atomic>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -54,12 +56,22 @@ static bool parseConfigSchedule(HalonConfig*, std::map<std::string, schedule_t>&
 static bool parseConfigIPs(HalonConfig*, const std::map<std::string, schedule_t>&, std::list<ip_t>&);
 static void update_rates();
 
+static std::atomic<bool> exclude(false);
+
 HALON_EXPORT
 bool Halon_early_init(HalonInitContext* hic)
 {
 	HalonConfig *cfg, *app;
 	HalonMTA_init_getinfo(hic, HALONMTA_INIT_CONFIG, nullptr, 0, &cfg, nullptr);
 	HalonMTA_init_getinfo(hic, HALONMTA_INIT_APPCONFIG, nullptr, 0, &app, nullptr);
+	
+	const char* exclude_cfg = HalonMTA_config_string_get(HalonMTA_config_object_get(cfg, "exclude"), nullptr);
+	if (exclude_cfg)
+		exclude = strcasecmp(exclude_cfg, "true") == 0 ? true : false;
+
+	const char* exclude_app = HalonMTA_config_string_get(HalonMTA_config_object_get(app, "exclude"), nullptr);
+	if (exclude_app)
+		exclude = strcasecmp(exclude_app, "true") == 0 ? true : false;
 
 	if (!parseConfigSchedule(cfg, schedules_smtpd))
 		return false;
@@ -110,6 +122,10 @@ void Halon_config_reload(HalonConfig* hc)
 		std::lock_guard<std::mutex> lg(lock);
 
 		syslog(LOG_INFO, "WarmUP: reloading");
+
+		const char* _exclude = HalonMTA_config_string_get(HalonMTA_config_object_get(hc, "exclude"), nullptr);
+		if (_exclude)
+			exclude = strcasecmp(_exclude, "true") == 0 ? true : false;
 
 		std::map<std::string, schedule_t> schedules2;
 		if (parseConfigSchedule(hc, schedules2))
@@ -232,6 +248,108 @@ void warmup_ips(HalonHSLContext* hhc, HalonHSLArguments* args, HalonHSLValue* re
 		++i;
 	}
 	return;
+}
+
+HALON_EXPORT
+bool Halon_queue_insert_callback(HalonQueueContext* hqc)
+{
+	if (!exclude)
+		return true;
+
+	char** localips;
+	size_t localips_count;
+	HalonMTA_queue_getinfo(hqc, HALONMTA_INFO_LOCALIPS, nullptr, 0, &localips, &localips_count);
+
+	bool modified = false;
+	HalonQueueMessage* hqm = nullptr;
+	std::vector<std::string> localips_touse;
+
+	std::map<size_t, std::string> value_cache;
+
+	lock.lock();
+	for (size_t i = 0; i < localips_count; ++i)
+	{
+		auto w = std::find_if(ips.begin(), ips.end(), [&](const ip_t &it) { return it.ip == localips[i]; });
+		if (w == ips.end())
+		{
+			localips_touse.push_back(localips[i]);
+			continue;
+		}
+
+		// if matching.. add... or set modified = true
+		bool match = false;
+		for (const auto& condition : policies)
+		{
+			std::map<int, std::string> compare;
+			for (const auto& p : (std::vector<std::pair<size_t, int>>){
+					 { HALONMTA_QUEUE_TRANSPORTID, HALONMTA_MESSAGE_TRANSACTIONID },
+					 { HALONMTA_QUEUE_REMOTEIP, HALONMTA_MESSAGE_REMOTEIP },
+					 { HALONMTA_QUEUE_REMOTEMX, HALONMTA_MESSAGE_REMOTEMX },
+					 { HALONMTA_QUEUE_RECIPIENTDOMAIN, HALONMTA_MESSAGE_RECIPIENTDOMAIN },
+					 { HALONMTA_QUEUE_JOBID, HALONMTA_MESSAGE_JOBID },
+					 { HALONMTA_QUEUE_GROUPING, HALONMTA_MESSAGE_GROUPING },
+					 { HALONMTA_QUEUE_TENANTID, HALONMTA_MESSAGE_TENANTID },
+				 })
+			{
+				if (condition.second.fields & p.first)
+				{
+					if (value_cache.find(p.first) == value_cache.end())
+					{
+						if (!hqm)
+							HalonMTA_queue_getinfo(hqc, HALONMTA_INFO_MESSAGE, nullptr, 0, &hqm, nullptr);
+						size_t vl;
+						const char* v;
+						HalonMTA_message_getinfo(hqm, p.second, nullptr, 0, &v, &vl);
+						value_cache[p.first] = std ::string(v, vl);
+					}
+					compare[(int)p.first] = value_cache[p.first];
+				}
+			}
+			bool subset = true;
+			for (const auto & kv : condition.second.if_)
+			{
+				auto itc = compare.find(kv.first);
+				if (itc == compare.end() || itc->second != kv.second)
+				{
+					subset = false;
+					break;
+				}
+			}
+			if (subset)
+			{
+				match = true;
+				break;
+			}
+		}
+
+		if (!match)
+			modified = true;
+		else
+			localips_touse.push_back(localips[i]);
+	}
+	lock.unlock();
+
+	if (modified)
+	{
+		if (localips_touse.empty())
+		{
+			HalonHSLValue* ret;
+			HalonMTA_queue_getinfo(hqc, HALONMTA_INFO_RETURN, NULL, 0, &ret, NULL);
+			HalonMTA_hsl_value_set(ret, HALONMTA_HSL_TYPE_ARRAY, nullptr, 0);
+			HalonHSLValue *key, *val;
+			HalonMTA_hsl_value_array_add(ret, &key, &val);
+			HalonMTA_hsl_value_set(key, HALONMTA_HSL_TYPE_STRING, "error", 0);
+			HalonMTA_hsl_value_set(val, HALONMTA_HSL_TYPE_STRING, "NO_IPS", 0);
+			return false;
+		}
+		const char** localips2 = new const char*[localips_touse.size()];
+		for (size_t i = 0; i < localips_touse.size(); ++i)
+			localips2[i] = localips_touse[i].c_str();
+		HalonMTA_queue_setinfo(hqc, HALONMTA_INFO_LOCALIPS, localips2, localips_touse.size());
+		delete[] localips2;
+	}
+
+	return true;
 }
 
 HALON_EXPORT

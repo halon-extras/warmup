@@ -123,6 +123,10 @@
           }
         }
       }
+    },
+    "exclude": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

@@ -1,4 +1,4 @@
-version: "5.8"
+version: "6.8"
 servers:
   - id: default
     listeners:
@@ -16,21 +16,3 @@ environment:
   umask: "0027"
   rlimit:
     nofile: 70000
-plugins:
-  - id: warmup
-    config:
-      schedules:
-        - class: slow_warmup
-          fields:
-            - localip
-            - remotemx: "#google"
-          interval: 3600
-          schedule:
-            - day: 0
-              messages: 10
-            - day: 1
-              messages: 20
-            - day: 2
-              messages: 30
-            - day: 3
-              messages: 40

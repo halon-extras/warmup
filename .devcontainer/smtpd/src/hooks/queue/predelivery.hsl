@@ -1,6 +1,12 @@
 Try(
 	[
-		"sourceip" => warmup_ips(),
+		"sourceip" => warmup_ips() + ["warm_ip_1"],
 		"sourceip_random" => false,
+		"plugin" => [
+			"id" => "sink",
+			"arguments" => [
+				"delay" => random_number(100, 1000)
+			]
+		]
 	]
 );

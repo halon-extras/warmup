@@ -31,6 +31,7 @@ Below is an example where warmup is only applied for the google `grouping`.
 plugins:
   - id: warmup
     config:
+      exclude: true
       schedules:
         - class: slow_warmup
           fields:
@@ -51,7 +52,7 @@ plugins:
             - day: 3
               messages: 40
       ips:
-        - ip: 10.1.1.1
+        - ip: "10.1.1.1"
           class: slow_warmup
           added: "2021-03-10"
 ```

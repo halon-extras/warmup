@@ -1,4 +1,4 @@
-version: "5.8"
+version: "6.8"
 servers:
   - id: default
     transport: mx
@@ -26,10 +26,39 @@ transportgroups:
 resolver:
   cache:
     size: 10000
+queues:
+  grouping:
+    default: recipientdomain
+    groupings:
+      - id: google
+        remotemx:
+          - "*.google.com"
+          - "*.googlemail.com"
+          - "*.smtp.goog"
+addresses:
+  - id: warm_ip_1
+    address: "10.1.1.2"
 plugins:
   - id: warmup
     config:
+      exclude: true
+      schedules:
+        - class: slow_warmup
+          fields:
+            - localip
+            - recipientdomain: "gmail.com"
+            - grouping: "&google"
+          interval: 3600
+          schedule:
+            - day: 0
+              messages: 10
+            - day: 1
+              messages: 20
+            - day: 2
+              messages: 30
+            - day: 3
+              messages: 40
       ips:
-        - ip: 10.1.1.1
+        - ip: "10.1.1.1"
           class: slow_warmup
-          added: "2021-03-10"
+          added: "2026-06-18"

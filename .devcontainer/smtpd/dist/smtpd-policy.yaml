@@ -1,8 +1,15 @@
 policies:
 - fields:
   - localip
-  - remotemx:
-      google:
-      - '*.gmail.com'
-      - '*.google.com'
-version: '5.9'
+  - remoteip
+- fields:
+  - localip
+  - recipientdomain
+- fields:
+  - localip
+  - grouping
+- fields:
+  - localip
+  - recipientdomain
+  - grouping
+version: '6.8'

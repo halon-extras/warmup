@@ -1,10 +1,39 @@
+addresses:
+- address: 10.1.1.2
+  id: warm_ip_1
 plugins:
 - config:
+    exclude: true
     ips:
-    - added: '2021-03-10'
+    - added: '2026-06-18'
       class: slow_warmup
       ip: 10.1.1.1
+    schedules:
+    - class: slow_warmup
+      fields:
+      - localip
+      - recipientdomain: gmail.com
+      - grouping: '&google'
+      interval: 3600
+      schedule:
+      - day: 0
+        messages: 10
+      - day: 1
+        messages: 20
+      - day: 2
+        messages: 30
+      - day: 3
+        messages: 40
   id: warmup
+queues:
+  grouping:
+    default: recipientdomain
+    groupings:
+    - id: google
+      remotemx:
+      - '*.google.com'
+      - '*.googlemail.com'
+      - '*.smtp.goog'
 resolver:
   cache:
     size: 10000
@@ -24,8 +53,10 @@ scripting:
 
         Accept();
       id: default
-    predelivery: "Try(\n\t[\n\t\t\"sourceip\" => warmup_ips(),\n\t\t\"sourceip_random\"\
-      \ => false,\n\t]\n);"
+    predelivery: "Try(\n\t[\n\t\t\"sourceip\" => warmup_ips() + [\"warm_ip_1\"],\n\
+      \t\t\"sourceip_random\" => false,\n\t\t\"plugin\" => [\n\t\t\t\"id\" => \"sink\"\
+      ,\n\t\t\t\"arguments\" => [\n\t\t\t\t\"delay\" => random_number(100, 1000)\n\
+      \t\t\t]\n\t\t]\n\t]\n);\n"
 servers:
 - id: default
   phases:
@@ -50,4 +81,4 @@ transportgroups:
     session:
       tls:
         mode: dane
-version: '5.8'
+version: '6.8'
