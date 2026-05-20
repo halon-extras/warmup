@@ -38,6 +38,7 @@ plugins:
             - localip
             - grouping: "&google"
           interval: 3600
+          ratealgorithm: tokenbucket
           properties:
             foo: bar
           schedule:

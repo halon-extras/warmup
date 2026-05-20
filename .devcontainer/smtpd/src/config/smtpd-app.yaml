@@ -49,6 +49,7 @@ plugins:
             - recipientdomain: "gmail.com"
             - grouping: "&google"
           interval: 3600
+          ratealgorithm: fixedwindow
           schedule:
             - day: 0
               messages: 10

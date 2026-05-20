@@ -12,4 +12,6 @@ policies:
   - localip
   - recipientdomain
   - grouping
+rate:
+  algorithm: tokenbucket
 version: '6.8'

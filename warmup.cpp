@@ -33,6 +33,7 @@ struct schedule_t
 	int fields = HALONMTA_QUEUE_LOCALIP;
 	std::map<int, std::string> if_;
 	std::map<size_t, day_t> days;
+	int ratealgorithm = HALONMTA_RATE_ALGORITHM_DEFAULT;
 };
 struct added_t
 {
@@ -42,6 +43,7 @@ struct added_t
 	size_t messages;
 	double interval;
 	std::map<std::string, std::string> props;
+	int ratealgorithm = HALONMTA_RATE_ALGORITHM_DEFAULT;
 };
 
 static std::map<std::string, schedule_t> schedules, schedules_smtpd, schedules_smtpd_app;
@@ -458,7 +460,7 @@ readd:
 				const int policy_type = all_fields_have_values ? HALONMTA_POLICY_TYPE_WARMUP : HALONMTA_POLICY_TYPE_DYNAMIC;
 
 				auto p = HalonMTA_queue_policy_add6(nullptr, schedule->second.fields, policy_type, transportid, ip_.ip.c_str(), remoteip, remotemx, recipientdomain, jobid, grouping, tenantid,
-						0, messages, interval, HALONMTA_RATE_ALGORITHM_DEFAULT, 0,
+						0, messages, interval, schedule->second.ratealgorithm, 0,
 						std::string(std::string("Day_") + std::to_string(days)).c_str(),
 						propv.size() ? &propv[0] : nullptr, propv.size(),
 						false,
@@ -468,7 +470,7 @@ readd:
 				else
 				{
 					syslog(LOG_INFO, "WarmUP: ip:%s class:%s days:%ld rate:%zu/%f", ip_.ip.c_str(), ip_.class_.c_str(), days, messages, interval);
-					policies[{ ip_.class_, ip_.ip }] = { p, schedule->second.fields, schedule->second.if_, messages, interval, props };
+					policies[{ ip_.class_, ip_.ip }] = { p, schedule->second.fields, schedule->second.if_, messages, interval, props, schedule->second.ratealgorithm };
 				}
 			}
 		}
@@ -525,6 +527,21 @@ bool parseConfigSchedule(HalonConfig* cfg, std::map<std::string, schedule_t>& sc
 		}
 
 		schedule_t schedule;
+
+		const char* ratealgorithm_ = HalonMTA_config_string_get(HalonMTA_config_object_get(d, "ratealgorithm"), nullptr);
+		if (ratealgorithm_)
+		{
+			const std::string ratealgorithm = ratealgorithm_;
+			if (ratealgorithm == "fixedwindow")
+				schedule.ratealgorithm = HALONMTA_RATE_ALGORITHM_FIXEDWINDOW;
+			else if (ratealgorithm == "tokenbucket")
+				schedule.ratealgorithm = HALONMTA_RATE_ALGORITHM_TOKENBUCKET;
+			else
+			{
+				syslog(LOG_CRIT, "Unknown rate algorithm: %s", ratealgorithm_);
+				return false;
+			}
+		}
 
 		size_t l = 0;
 		HalonConfig* i;

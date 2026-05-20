@@ -1,4 +1,6 @@
 version: "6.8"
+rate:
+  algorithm: tokenbucket
 policies:
   - fields:
     - localip
