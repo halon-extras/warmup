@@ -1,5 +1,7 @@
 services:
-  # ubuntu-26.04:
+  # ubuntu-26.04-amd64:
+  #   profiles: ["amd64", "all"]
+  #   platform: linux/amd64
   #   build:
   #     context: ./ubuntu-26.04
   #     dockerfile: ./Dockerfile
@@ -10,7 +12,9 @@ services:
   #       - linux/amd64
   #   volumes:
   #     - ../:/plugin
-  ubuntu-24.04:
+  ubuntu-24.04-amd64:
+    profiles: ["amd64", "all"]
+    platform: linux/amd64
     build:
       context: ./ubuntu-24.04
       dockerfile: ./Dockerfile
@@ -21,7 +25,9 @@ services:
         - linux/amd64
     volumes:
       - ../:/plugin
-  ubuntu-22.04:
+  ubuntu-22.04-amd64:
+    profiles: ["amd64", "all"]
+    platform: linux/amd64
     build:
       context: ./ubuntu-22.04
       dockerfile: ./Dockerfile
@@ -32,7 +38,9 @@ services:
         - linux/amd64
     volumes:
       - ../:/plugin
-  # rocky-10:
+  # rocky-10-amd64:
+  #   profiles: ["amd64", "all"]
+  #   platform: linux/amd64
   #   build:
   #     context: ./rocky-10
   #     dockerfile: ./Dockerfile
@@ -43,7 +51,9 @@ services:
   #       - linux/amd64
   #   volumes:
   #     - ../:/plugin
-  rocky-9:
+  rocky-9-amd64:
+    profiles: ["amd64", "all"]
+    platform: linux/amd64
     build:
       context: ./rocky-9
       dockerfile: ./Dockerfile
@@ -54,7 +64,9 @@ services:
         - linux/amd64
     volumes:
       - ../:/plugin
-  centos-8:
+  centos-8-amd64:
+    profiles: ["amd64", "all"]
+    platform: linux/amd64
     build:
       context: ./centos-8
       dockerfile: ./Dockerfile
@@ -65,7 +77,9 @@ services:
         - linux/amd64
     volumes:
       - ../:/plugin
-  azure-3:
+  azure-3-amd64:
+    profiles: ["amd64", "all"]
+    platform: linux/amd64
     build:
       context: ./azure-3
       dockerfile: ./Dockerfile
