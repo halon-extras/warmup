@@ -1,17 +1,30 @@
 services:
-  # ubuntu-26.04-amd64:
-  #   profiles: ["amd64", "all"]
-  #   platform: linux/amd64
-  #   build:
-  #     context: ./ubuntu-26.04
-  #     dockerfile: ./Dockerfile
-  #     args:
-  #       HALON_REPO_USER: ${HALON_REPO_USER}
-  #       HALON_REPO_PASS: ${HALON_REPO_PASS}
-  #     platforms:
-  #       - linux/amd64
-  #   volumes:
-  #     - ../:/plugin
+  ubuntu-26.04-arm64:
+    profiles: ["arm64", "all"]
+    platform: linux/arm64
+    build:
+      context: ./ubuntu-26.04
+      dockerfile: ./Dockerfile
+      args:
+        HALON_REPO_USER: ${HALON_REPO_USER}
+        HALON_REPO_PASS: ${HALON_REPO_PASS}
+      platforms:
+        - linux/arm64
+    volumes:
+      - ../:/plugin
+  ubuntu-26.04-amd64:
+    profiles: ["amd64", "all"]
+    platform: linux/amd64
+    build:
+      context: ./ubuntu-26.04
+      dockerfile: ./Dockerfile
+      args:
+        HALON_REPO_USER: ${HALON_REPO_USER}
+        HALON_REPO_PASS: ${HALON_REPO_PASS}
+      platforms:
+        - linux/amd64
+    volumes:
+      - ../:/plugin
   ubuntu-24.04-amd64:
     profiles: ["amd64", "all"]
     platform: linux/amd64
@@ -38,19 +51,32 @@ services:
         - linux/amd64
     volumes:
       - ../:/plugin
-  # rocky-10-amd64:
-  #   profiles: ["amd64", "all"]
-  #   platform: linux/amd64
-  #   build:
-  #     context: ./rocky-10
-  #     dockerfile: ./Dockerfile
-  #     args:
-  #       HALON_REPO_USER: ${HALON_REPO_USER}
-  #       HALON_REPO_PASS: ${HALON_REPO_PASS}
-  #     platforms:
-  #       - linux/amd64
-  #   volumes:
-  #     - ../:/plugin
+  rocky-10-arm64:
+    profiles: ["arm64", "all"]
+    platform: linux/arm64
+    build:
+      context: ./rocky-10
+      dockerfile: ./Dockerfile
+      args:
+        HALON_REPO_USER: ${HALON_REPO_USER}
+        HALON_REPO_PASS: ${HALON_REPO_PASS}
+      platforms:
+        - linux/arm64
+    volumes:
+      - ../:/plugin
+  rocky-10-amd64:
+    profiles: ["amd64", "all"]
+    platform: linux/amd64
+    build:
+      context: ./rocky-10
+      dockerfile: ./Dockerfile
+      args:
+        HALON_REPO_USER: ${HALON_REPO_USER}
+        HALON_REPO_PASS: ${HALON_REPO_PASS}
+      platforms:
+        - linux/amd64
+    volumes:
+      - ../:/plugin
   rocky-9-amd64:
     profiles: ["amd64", "all"]
     platform: linux/amd64
