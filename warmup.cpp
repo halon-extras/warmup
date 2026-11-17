@@ -284,7 +284,7 @@ bool Halon_queue_insert_callback(HalonQueueContext* hqc)
 		{
 			std::map<int, std::string> compare;
 			for (const auto& p : (std::vector<std::pair<size_t, int>>){
-					 { HALONMTA_QUEUE_TRANSPORTID, HALONMTA_MESSAGE_TRANSACTIONID },
+					 { HALONMTA_QUEUE_TRANSPORTID, HALONMTA_MESSAGE_TRANSPORTID },
 					 { HALONMTA_QUEUE_REMOTEIP, HALONMTA_MESSAGE_REMOTEIP },
 					 { HALONMTA_QUEUE_REMOTEMX, HALONMTA_MESSAGE_REMOTEMX },
 					 { HALONMTA_QUEUE_RECIPIENTDOMAIN, HALONMTA_MESSAGE_RECIPIENTDOMAIN },
